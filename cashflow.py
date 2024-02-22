@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import argparse
 
 def parseArgs():
-    parser = argparse.ArgumentParser(description="BudgetTracker - Ecxel file from bank to plots")
+    parser = argparse.ArgumentParser(description="BudgetTracker - Excel file from bank to plots")
     parser.add_argument(
         '-f',
         '--file',
@@ -18,44 +18,59 @@ def parseArgs():
     return file
 
 def loadData(nameOfFile):
-    dataset = pd.read_excel(nameOfFile)
-    return dataset
+    if nameOfFile[-4:] == 'xlsx':
+        dataset = pd.read_excel(nameOfFile)
+        return dataset
+    else:
+        print("Error, your file isn't Excel file. Format of Excel file is xlsx!")
+        return 0
         
 def showPlot(dataset):
-    if dataset.empty != True:
-        fig, ax = plt.subplots(constrained_layout=True)
-        dataset['День'] = [int(x.split()[0]) for x in dataset['Дата']]
+    try:
+        if dataset.empty != True:
+            fig, ax = plt.subplots(constrained_layout=True)
+            dataset['День'] = [int(x.split()[0]) for x in dataset['Дата']]
 
-        sns.lineplot(
-            data=dataset,
-            x='День',
-            y='Сумма',
-            hue='Категория',
-            ax=ax
-        )
-        ax.legend()
-        plt.show()
-    else:
-        print("File not founded!")
+            sns.lineplot(
+                data=dataset,
+                x='День',
+                y='Сумма',
+                hue='Категория',
+                ax=ax
+            )
+            ax.legend()
+            plt.show()
+        else:
+            print("File not founded!")
+    except AttributeError:
+        return 0
 
 def showBar(dataset):
-    if dataset.empty != True:
-        fig, ax = plt.subplots(constrained_layout=True)
-        sns.barplot(
-            data = dataset,
-            y= 'Категория',
-            x= 'Сумма',
-            orient = 'h',
-            estimator = 'sum',
-            errorbar=None,
-            ax=ax
-        )
-        plt.show()
-    else:
-        print("File not founded!")
+    try:
+        if dataset.empty != True:
+            fig, ax = plt.subplots(constrained_layout=True)
+            sns.barplot(
+                data = dataset,
+                y= 'Категория',
+                x= 'Сумма',
+                orient = 'h',
+                estimator = 'sum',
+                errorbar=None,
+                ax=ax
+            )
+            plt.show()
+        else:
+            print("File not founded!")
+    except AttributeError:
+        return 0
+    
 
-try:
-    showBar(loadData(parseArgs()))
-    showPlot(loadData(parseArgs()))
-except FileNotFoundError:
-    print('Ошибка файл не найден или не существует!')
+def startScript():
+    try:
+        showBar(loadData(parseArgs()))
+        showPlot(loadData(parseArgs()))
+        print('All works without errors!')
+    except FileNotFoundError:
+        print("Error! File don't finded!")
+
+startScript()
